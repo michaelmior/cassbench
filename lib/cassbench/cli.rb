@@ -7,9 +7,27 @@ module CassBench::CLI
          'runs the BENCHMARK and reports results'
     option :host, type: :string, default: 'localhost'
     option :port, type: :numeric, default: 9042
+    option :keyspace, type: :string, default: 'cassbench'
+    option :create, type: :boolean, default: false
+    option :drop, type: :boolean, default: false
     def bench(benchmark)
+      # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]
-      client = cluster.connect
+      session = cluster.connect
+
+      # Create the keyspace if asked and select it
+      if options[:create]
+        session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
+                        "replication = {'class': 'SimpleStrategy', " \
+                        "               'replication_factor': 3};"
+      end
+      session.execute "USE #{options[:keyspace]};"
+
+      # Connect to the cluster and require (execute) the benchmark
+      CassBench::Bench.session = session
+      require_relative "../../bench/#{benchmark}"
+
+      session.execute "DROP KEYSPACE #{options[:keyspace]}" if options[:drop]
     end
   end
 end

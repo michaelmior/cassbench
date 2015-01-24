@@ -1,9 +1,17 @@
+GIT
+  remote: git://github.com/michaelmior/benchmark_suite.git
+  revision: 5386cadca8e257e26924533bdee88633d0e0ca35
+  ref: 5386cad
+  specs:
+    benchmark_suite (1.0.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
     benchmark-ips (2.1.1)
     cassandra-driver (1.1.1)
       ione (~> 1.2)
+    ffi (1.9.6)
     ione (1.2.0)
     thor (0.19.1)
 
@@ -12,5 +20,7 @@ PLATFORMS
 
 DEPENDENCIES
   benchmark-ips
+  benchmark_suite!
   cassandra-driver
+  ffi
   thor
