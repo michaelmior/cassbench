@@ -1,7 +1,8 @@
 class ColumnFetch < CassBench::Bench
-  def self.setup(session)
+  def self.setup(session, options)
     session.execute "CREATE TABLE column_fetch (id uuid, col text, " \
-                    "data text, PRIMARY KEY (id, col)) WITH caching = 'ALL';"
+                    "data text, PRIMARY KEY (id, col)) " \
+                    "WITH caching = '#{options[:caching]}';"
 
     data = '1' * 100
     insert = session.prepare "INSERT INTO column_fetch (id, col, data) " \

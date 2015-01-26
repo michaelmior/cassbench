@@ -11,6 +11,8 @@ module CassBench::CLI
     option :create, type: :boolean, default: false
     option :drop, type: :boolean, default: false
     option :flush, type: :boolean, default: false
+    option :caching, type: :string, default: 'all',
+           enum: ['all', 'keys_only', 'rows_only', 'none']
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]

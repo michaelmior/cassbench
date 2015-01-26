@@ -30,7 +30,7 @@ module CassBench
     def self.run_all(cluster, session, options)
       # Find all the loaded benchmarks and run their setup routines
       benchmarks = subclasses
-      benchmarks.each { |benchmark| benchmark.setup session }
+      benchmarks.each { |benchmark| benchmark.setup session, options }
 
       # Optionally flush the keyspace after setup
       if options[:flush]

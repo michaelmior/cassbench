@@ -1,7 +1,8 @@
 class SingleRowFetch < CassBench::Bench
-  def self.setup(session)
+  def self.setup(session, options)
     session.execute "CREATE TABLE single_row_fetch " \
-                    "(id uuid PRIMARY KEY, data text) WITH caching = 'ALL';"
+                    "(id uuid PRIMARY KEY, data text) " \
+                    "WITH caching = '#{options[:caching]}';"
 
     data = '1' * 100
     insert = session.prepare "INSERT INTO single_row_fetch (id, data) " \
