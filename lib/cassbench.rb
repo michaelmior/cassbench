@@ -32,13 +32,20 @@ module CassBench
       benchmarks = subclasses
       benchmarks.each { |benchmark| benchmark.setup session, options }
 
-      # Optionally flush the keyspace after setup
-      if options[:flush]
+      # Optionally flush or compact the keyspace after setup
+      if options[:flush] || options[:compact]
         cluster.hosts.each do |host|
-          JMX::MBean.establish_connection :host => host.ip.to_s, :port => 7199
+          conn = JMX::MBean.create_connection host: host.ip.to_s, port: 7199
           sproxy = JMX::MBean.find_by_name 'org.apache.cassandra.db:'\
-                                           'type=StorageService'
-          sproxy.force_keyspace_flush options[:keyspace], [].to_java(:string)
+                                           'type=StorageService',
+                                           connection: conn
+          if options[:flush]
+            sproxy.force_keyspace_flush options[:keyspace], [].to_java(:string)
+          end
+          if options[:compact]
+            sproxy.force_keyspace_compaction options[:keyspace],
+                                             [].to_java(:string)
+          end
         end
       end
 
