@@ -12,22 +12,25 @@ end
 
 module CassBench
   class Bench
-    @client = nil
+    def self.run_all(session)
+      # Find all the loaded benchmarks and run their setup routines
+      benchmarks = ObjectSpace.each_object(self.singleton_class).to_a
+      benchmarks.select! { |cls| cls != self }
+      benchmarks.each { |benchmark| benchmark.setup session }
 
-    def self.run(&block)
+      # Run all the benchmarks
       suite = Benchmark::Suite.create do |suite|
-
         Benchmark.ips do |bench|
           bench.config warmup: 30, time: 300
-          block.call bench, @session
+          benchmarks.each { |benchmark| benchmark.run bench, session }
         end
       end
 
+      # Display all the collected reports
       suite.report.each(&:display)
-    end
 
-    def self.session=(session)
-      @session = session
+      # Run the cleanup for each benchmark
+      benchmarks.each { |benchmark| benchmark.cleanup session }
     end
   end
 end
