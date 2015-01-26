@@ -27,17 +27,19 @@ module CassBench
   class Bench
     extend SubclassTracking
 
-    def self.run_all(session, options)
+    def self.run_all(cluster, session, options)
       # Find all the loaded benchmarks and run their setup routines
       benchmarks = subclasses
       benchmarks.each { |benchmark| benchmark.setup session }
 
       # Optionally flush the keyspace after setup
       if options[:flush]
-        JMX::MBean.establish_connection :host => options[:host], :port => 7199
-        sproxy = JMX::MBean.find_by_name 'org.apache.cassandra.db:'\
-          'type=StorageService'
-        sproxy.force_keyspace_flush options[:keyspace], [].to_java(:string)
+        cluster.hosts.each do |host|
+          JMX::MBean.establish_connection :host => host.ip.to_s, :port => 7199
+          sproxy = JMX::MBean.find_by_name 'org.apache.cassandra.db:'\
+                                           'type=StorageService'
+          sproxy.force_keyspace_flush options[:keyspace], [].to_java(:string)
+        end
       end
 
       # Run all the benchmarks

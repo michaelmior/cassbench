@@ -30,7 +30,7 @@ module CassBench::CLI
 
       # Connect to the cluster and require (execute) the benchmark
       require_relative "../../bench/#{benchmark}"
-      CassBench::Bench.run_all session, options
+      CassBench::Bench.run_all cluster, session, options
 
       session.execute "DROP KEYSPACE #{options[:keyspace]}" if options[:drop]
     end
