@@ -3,7 +3,7 @@ require 'thor'
 
 module CassBench::CLI
   class CassBenchCLI < Thor
-    desc 'run BENCHMARK',
+    desc 'bench BENCHMARK',
          'runs the BENCHMARK and reports results'
     option :host, type: :string, default: 'localhost'
     option :port, type: :numeric, default: 9042
