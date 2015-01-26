@@ -1,10 +1,11 @@
 class SingleRowFetch < CassBench::Bench
   def self.setup(session)
-    session.execute "CREATE TABLE test (id uuid PRIMARY KEY, data text) "\
-      "WITH caching = 'ALL';"
+    session.execute "CREATE TABLE single_row_fetch " \
+                    "(id uuid PRIMARY KEY, data text) WITH caching = 'ALL';"
 
     data = '1' * 100
-    insert = session.prepare "INSERT INTO test (id, data) VALUES (?, ?)"
+    insert = session.prepare "INSERT INTO single_row_fetch (id, data) " \
+                             "VALUES (?, ?)"
     generator = Cassandra::Uuid::Generator.new
 
     # Insert 100,000 random rows
@@ -21,7 +22,7 @@ class SingleRowFetch < CassBench::Bench
       i = 0
       futures = []
       while i < times
-        query = "SELECT data FROM test WHERE " \
+        query = "SELECT data FROM single_row_fetch WHERE " \
                 "id=756716f7-2e54-4715-9f00-91dcbea6cf50;"
         futures.push session.execute_async(query)
         i += 1
@@ -32,6 +33,6 @@ class SingleRowFetch < CassBench::Bench
   end
 
   def self.cleanup(session)
-    session.execute "DROP TABLE test;"
+    session.execute "DROP TABLE single_row_fetch;"
   end
 end
