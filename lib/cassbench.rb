@@ -1,6 +1,8 @@
 require 'benchmark/ips'
 require 'benchmark/suite'
 
+require 'jmx4r' if RUBY_PLATFORM == 'java'
+
 module Benchmark
   module IPS
     class Job
@@ -10,13 +12,33 @@ module Benchmark
   end
 end
 
+module SubclassTracking
+    def self.extended(superclass)
+      (class << superclass; self; end).send :attr_accessor, :subclasses
+      (class << superclass; self; end).send :define_method, :inherited do |cls|
+        superclass.subclasses << cls
+        super(cls)
+      end
+      superclass.subclasses = []
+    end
+end
+
 module CassBench
   class Bench
-    def self.run_all(session)
+    extend SubclassTracking
+
+    def self.run_all(session, options)
       # Find all the loaded benchmarks and run their setup routines
-      benchmarks = ObjectSpace.each_object(self.singleton_class).to_a
-      benchmarks.select! { |cls| cls != self }
+      benchmarks = subclasses
       benchmarks.each { |benchmark| benchmark.setup session }
+
+      # Optionally flush the keyspace after setup
+      if options[:flush]
+        JMX::MBean.establish_connection :host => options[:host], :port => 7199
+        sproxy = JMX::MBean.find_by_name 'org.apache.cassandra.db:'\
+          'type=StorageService'
+        sproxy.force_keyspace_flush options[:keyspace], [].to_java(:string)
+      end
 
       # Run all the benchmarks
       suite = Benchmark::Suite.create do |suite|

@@ -7,6 +7,10 @@ gem 'cassandra-driver'
 gem 'ffi'
 gem 'thor'
 
+platform :jruby do
+  gem 'jmx4r'
+end
+
 platform :ruby do
   group :development do
     gem 'pry'

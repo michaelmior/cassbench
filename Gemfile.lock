@@ -27,6 +27,7 @@ GEM
     ffi (1.9.6-java)
     interception (0.5)
     ione (1.2.0)
+    jmx4r (0.1.4)
     method_source (0.8.2)
     pry (0.10.1)
       coderay (~> 1.1.0)
@@ -53,6 +54,7 @@ DEPENDENCIES
   benchmark_suite!
   cassandra-driver
   ffi
+  jmx4r
   pry
   pry-byebug
   pry-rescue

@@ -10,6 +10,7 @@ module CassBench::CLI
     option :keyspace, type: :string, default: 'cassbench'
     option :create, type: :boolean, default: false
     option :drop, type: :boolean, default: false
+    option :flush, type: :boolean, default: false
     def bench(benchmark)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]
@@ -29,7 +30,7 @@ module CassBench::CLI
 
       # Connect to the cluster and require (execute) the benchmark
       require_relative "../../bench/#{benchmark}"
-      CassBench::Bench.run_all session
+      CassBench::Bench.run_all session, options
 
       session.execute "DROP KEYSPACE #{options[:keyspace]}" if options[:drop]
     end
