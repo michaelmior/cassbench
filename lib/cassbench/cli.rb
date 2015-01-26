@@ -17,9 +17,13 @@ module CassBench::CLI
 
       # Create the keyspace if asked and select it
       if options[:create]
-        session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
-                        "replication = {'class': 'SimpleStrategy', " \
-                        "               'replication_factor': 3};"
+        begin
+          session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
+                          "replication = {'class': 'SimpleStrategy', " \
+                          "               'replication_factor': 3};"
+        rescue Cassandra::Errors::AlreadyExistsError
+          # Keyspace already exists, that's ok
+        end
       end
       session.execute "USE #{options[:keyspace]};"
 
