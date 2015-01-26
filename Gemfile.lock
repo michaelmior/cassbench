@@ -11,11 +11,15 @@ GEM
     benchmark-ips (2.1.1)
     cassandra-driver (1.1.1)
       ione (~> 1.2)
+    cassandra-driver (1.1.1-java)
+      ione (~> 1.2)
     ffi (1.9.6)
+    ffi (1.9.6-java)
     ione (1.2.0)
     thor (0.19.1)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
