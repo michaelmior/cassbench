@@ -3,15 +3,15 @@ require 'thor'
 
 module CassBench::CLI
   class CassBenchCLI < Thor
-    desc 'bench BENCHMARK',
-         'runs the BENCHMARK and reports results'
+    desc 'bench BENCHMARKS',
+         'runs the BENCHMARKS and reports results'
     option :host, type: :string, default: 'localhost'
     option :port, type: :numeric, default: 9042
     option :keyspace, type: :string, default: 'cassbench'
     option :create, type: :boolean, default: false
     option :drop, type: :boolean, default: false
     option :flush, type: :boolean, default: false
-    def bench(benchmark)
+    def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]
       session = cluster.connect
@@ -29,7 +29,9 @@ module CassBench::CLI
       session.execute "USE #{options[:keyspace]};"
 
       # Connect to the cluster and require (execute) the benchmark
-      require_relative "../../bench/#{benchmark}"
+      benchmarks.each do |benchmark|
+        require_relative "../../bench/#{benchmark}"
+      end
       CassBench::Bench.run_all cluster, session, options
 
       session.execute "DROP KEYSPACE #{options[:keyspace]}" if options[:drop]
