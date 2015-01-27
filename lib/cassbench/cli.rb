@@ -20,6 +20,13 @@ module CassBench::CLI
       session = cluster.connect
 
       # Create the keyspace if asked and select it
+      if options[:drop]
+        begin
+          session.execute "DROP KEYSPACE #{options[:keyspace]}"
+        rescue Cassandra::Errors::ConfigurationError
+          # Keyspace doesn't exist, that's ok
+        end
+      end
       if options[:create]
         begin
           session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
