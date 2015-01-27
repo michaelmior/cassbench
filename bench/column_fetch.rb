@@ -19,7 +19,7 @@ class ColumnFetch < CassBench::Bench
   end
 
   def self.run(bench, session)
-    bench.report('fetch') do |times|
+    bench.report('column_fetch') do |times|
       i = 0
       futures = []
       while i < times
