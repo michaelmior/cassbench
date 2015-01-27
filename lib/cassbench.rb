@@ -53,7 +53,7 @@ module CassBench
       suite = Benchmark::Suite.create do |suite|
         Benchmark.ips do |bench|
           bench.config warmup: 30, time: 300
-          benchmarks.each { |benchmark| benchmark.run bench, session }
+          benchmarks.each { |benchmark| benchmark.run bench, session, options }
         end
       end
 

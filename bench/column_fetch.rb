@@ -1,26 +1,24 @@
 class ColumnFetch < CassBench::Bench
-  @@max_rows = 100_000
-
   def self.setup(session, options)
     session.execute "CREATE TABLE column_fetch (id text, col text, " \
                     "data text, PRIMARY KEY (id, col)) " \
                     "WITH caching = '#{options[:caching]}';"
 
-    data = '1' * 100
+    data = '1' * options[:size]
     insert = session.prepare "INSERT INTO column_fetch (id, col, data) " \
                              "VALUES (?, ?, ?)"
 
     # Insert random rows
-    1.upto(@@max_rows) do |i|
+    1.upto(options[:rows]) do |i|
       session.execute insert, '%010d' % i, '%010d' % i, data
     end
   end
 
-  def self.run(bench, session)
+  def self.run(bench, session, options)
     bench.report('column_fetch') do |times|
       i = 0
       futures = []
-      ids = Array.new(times) { '%010d' % (rand * @@max_rows).ceil }
+      ids = Array.new(times) { '%010d' % (rand * options[:rows]).ceil }
       while i < times
         query = "SELECT data FROM column_fetch WHERE " \
                 "id='#{ids[i]}' AND col='0000000001';"
