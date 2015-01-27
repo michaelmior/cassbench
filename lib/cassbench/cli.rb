@@ -3,6 +3,10 @@ require 'thor'
 
 module CassBench::CLI
   class CassBenchCLI < Thor
+    def self.exit_on_failure?
+      true
+    end
+
     desc 'bench BENCHMARKS',
          'runs the BENCHMARKS and reports results'
     option :host, type: :string, default: 'localhost'
