@@ -20,6 +20,7 @@ module CassBench::CLI
            enum: ['all', 'keys_only', 'rows_only', 'none']
     option :rows, type: :numeric, default: 100_000
     option :size, type: :numeric, default: 100
+    option :replication_factor, type: :numeric, default: 3
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]
@@ -37,7 +38,8 @@ module CassBench::CLI
         begin
           session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
                           "replication = {'class': 'SimpleStrategy', " \
-                          "               'replication_factor': 3};"
+                          "               'replication_factor': " \
+                          "#{options[:replication_factor]}};"
         rescue Cassandra::Errors::AlreadyExistsError
           # Keyspace already exists, that's ok
         end
