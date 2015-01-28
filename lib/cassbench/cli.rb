@@ -27,24 +27,8 @@ module CassBench::CLI
       session = cluster.connect
 
       # Create the keyspace if asked and select it
-      if options[:drop]
-        begin
-          session.execute "DROP KEYSPACE #{options[:keyspace]}"
-        rescue Cassandra::Errors::ConfigurationError
-          # Keyspace doesn't exist, that's ok
-        end
-      end
-      if options[:create]
-        begin
-          session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
-                          "replication = {'class': 'SimpleStrategy', " \
-                          "               'replication_factor': " \
-                          "#{options[:replication_factor]}};"
-        rescue Cassandra::Errors::AlreadyExistsError
-          # Keyspace already exists, that's ok
-        end
-      end
-      session.execute "USE #{options[:keyspace]};"
+      drop_keyspace session, options[:keyspace] if options[:drop]
+      create_keyspace session, options
 
       # Connect to the cluster and require (execute) the benchmark
       benchmarks.each do |benchmark|
@@ -52,7 +36,33 @@ module CassBench::CLI
       end
       CassBench::Bench.run_all cluster, session, options
 
-      session.execute "DROP KEYSPACE #{options[:keyspace]}" if options[:drop]
+      drop_keyspace session, options[:keyspace] if options[:drop]
+    end
+
+    private
+
+    # Drop the given keyspace
+    def drop_keyspace(session, keyspace)
+      begin
+        session.execute "DROP KEYSPACE #{keyspace}"
+      rescue Cassandra::Errors::ConfigurationError
+        # Keyspace doesn't exist, that's ok
+      end
+    end
+
+    def create_keyspace(session, options)
+      return unless options[:create]
+
+      begin
+        session.execute "CREATE KEYSPACE #{options[:keyspace]} WITH " \
+                        "replication = {'class': 'SimpleStrategy', " \
+                        "               'replication_factor': " \
+                        "#{options[:replication_factor]}};"
+      rescue Cassandra::Errors::AlreadyExistsError
+        # Keyspace already exists, that's ok
+      end
+
+      session.execute "USE #{options[:keyspace]};"
     end
   end
 end
