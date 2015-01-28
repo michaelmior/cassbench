@@ -18,6 +18,8 @@ module CassBench::CLI
     option :compact, type: :boolean, default: false
     option :caching, type: :string, default: 'all',
            enum: ['all', 'keys_only', 'rows_only', 'none']
+    option :compression, type: :string, default: 'none',
+           enum: ['snappy', 'lz4', 'deflate', 'none']
     option :rows, type: :numeric, default: 100_000
     option :size, type: :numeric, default: 100
     option :replication_factor, type: :numeric, default: 3
@@ -29,6 +31,16 @@ module CassBench::CLI
       # Create the keyspace if asked and select it
       drop_keyspace session, options[:keyspace] if options[:drop]
       create_keyspace session, options
+
+      # Set the class of compressor to use
+      x = options.dup
+      options = x
+      options[:compression] = {
+        'snappy'  => 'SnappyCompressor',
+        'lz4'     => 'LZ4Compressor',
+        'deflate' => 'DeflateCompressor',
+        'none'    => ''
+      }[options[:compression]]
 
       # Connect to the cluster and require (execute) the benchmark
       benchmarks.each do |benchmark|
