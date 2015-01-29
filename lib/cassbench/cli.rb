@@ -3,6 +3,8 @@ require 'thor'
 
 module CassBench::CLI
   class CassBenchCLI < Thor
+    check_unknown_options!
+
     def self.exit_on_failure?
       true
     end
