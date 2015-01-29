@@ -1,5 +1,5 @@
 class ColumnFetch < CassBench::Bench
-  def self.setup(session, options)
+  def self.setup(cluster, session, options)
     session.execute "CREATE TABLE column_fetch (id text, col text, " \
                     "data text, PRIMARY KEY (id, col)) " \
                     "WITH caching = '#{options[:caching]}' AND " \
@@ -13,6 +13,8 @@ class ColumnFetch < CassBench::Bench
     # Insert random rows
     1.upto(options[:rows]) do |i|
       session.execute insert, '%010d' % i, '%010d' % i, data
+      self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
+        if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
     end
   end
 
