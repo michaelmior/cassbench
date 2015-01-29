@@ -52,7 +52,8 @@ module CassBench
       suite.report.each(&:display)
 
       # Run the cleanup for each benchmark
-      benchmarks.each { |benchmark| benchmark.cleanup session }
+      benchmarks.each { |benchmark| benchmark.cleanup session } \
+        if options[:cleanup]
     end
 
     # Send a management command to all nodes in a cluster
