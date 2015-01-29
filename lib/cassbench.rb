@@ -28,6 +28,9 @@ module CassBench
     extend SubclassTracking
 
     def self.run_all(cluster, session, options)
+      # Disable auto compaction while running
+      jmx_command cluster, :disable_auto_compaction, options[:keyspace]
+
       # Find all the loaded benchmarks and run their setup routines
       benchmarks = subclasses
       benchmarks.each { |benchmark| benchmark.setup cluster, session, options }

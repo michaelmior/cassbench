@@ -4,7 +4,9 @@ class ColumnFetch < CassBench::Bench
                     "data text, PRIMARY KEY (id, col)) " \
                     "WITH caching = '#{options[:caching]}' AND " \
                     "compression={'sstable_compression': " \
-                    "             '#{options[:compression]}'};"
+                    "             '#{options[:compression]}'} AND " \
+                    "compaction={'class' : 'SizeTieredCompactionStrategy', " \
+                    "            'enabled': false };"
 
     data = '1' * options[:size]
     insert = session.prepare "INSERT INTO column_fetch (id, col, data) " \
