@@ -18,21 +18,17 @@ class ColumnFetch < CassBench::Bench
       self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
         if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
     end
+
+    @indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
+    @@query = "SELECT data FROM single_row_fetch WHERE id='?' AND " \
+              "col='0000000001;;"
   end
 
   def self.run(bench, session, options)
     bench.report('column_fetch') do |times|
-      i = 0
-      futures = []
-      ids = Array.new(times) { '%010d' % (rand * options[:rows]).ceil }
-      while i < times
-        query = "SELECT data FROM column_fetch WHERE " \
-                "id='#{ids[i]}' AND col='0000000001';"
-        futures.push session.execute_async(query)
-        i += 1
+      0.upto(times - 1) do |i|
+        session.execute @@query, @@indexes[i % options[:rows]]
       end
-
-      futures.each(&:get)
     end
   end
 
