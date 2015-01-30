@@ -35,6 +35,7 @@ module CassBench::CLI
       # Create the keyspace if asked and select it
       drop_keyspace session, options[:keyspace] if options[:drop]
       create_keyspace session, options
+      session.execute "USE #{options[:keyspace]};"
 
       # Set the class of compressor to use
       x = options.dup
@@ -77,8 +78,6 @@ module CassBench::CLI
       rescue Cassandra::Errors::AlreadyExistsError
         # Keyspace already exists, that's ok
       end
-
-      session.execute "USE #{options[:keyspace]};"
     end
   end
 end
