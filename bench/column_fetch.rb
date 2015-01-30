@@ -1,11 +1,5 @@
 class ColumnFetch < CassBench::Bench
   def self.setup(cluster, session, options)
-    @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
-    @@query = session.prepare "SELECT data FROM column_fetch WHERE id=? " \
-                              "AND col='0000000001';"
-
-    return unless options[:setup]
-
     session.execute "CREATE TABLE column_fetch (id text, col text, " \
                     "data text, PRIMARY KEY (id, col)) " \
                     "WITH caching = '#{options[:caching]}' AND " \
@@ -26,6 +20,10 @@ class ColumnFetch < CassBench::Bench
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
     end
+
+    @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
+    @@query = session.prepare "SELECT data FROM column_fetch WHERE id=? " \
+                              "AND col='0000000001';"
   end
 
   def self.run(bench, session, options)

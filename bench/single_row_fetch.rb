@@ -1,10 +1,5 @@
 class SingleRowFetch < CassBench::Bench
   def self.setup(cluster, session, options)
-    @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
-    @@query = session.prepare "SELECT data FROM single_row_fetch WHERE id=?;"
-
-    return unless options[:setup]
-
     session.execute "CREATE TABLE single_row_fetch " \
                     "(id text PRIMARY KEY, data text) " \
                     "WITH caching = '#{options[:caching]}' AND " \
@@ -25,6 +20,9 @@ class SingleRowFetch < CassBench::Bench
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
     end
+
+    @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
+    @@query = session.prepare "SELECT data FROM single_row_fetch WHERE id=?;"
   end
 
   def self.run(bench, session, options)
