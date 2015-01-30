@@ -33,11 +33,7 @@ module CassBench
 
       # Find all the loaded benchmarks and run their setup routines
       benchmarks = subclasses
-      if options[:setup]
-        benchmarks.each do |benchmark|
-          benchmark.setup cluster, session, options
-        end
-      end
+      benchmarks.each { |benchmark| benchmark.setup cluster, session, options }
 
       # Optionally flush or compact the keyspace after setup
       if options[:flush] || options[:compact]
