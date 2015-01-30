@@ -19,6 +19,7 @@ module CassBench::CLI
     option :flush, type: :boolean, default: false
     option :compact, type: :boolean, default: false
     option :cleanup, type: :boolean, default: true
+    option :setup, type: :boolean, default: true
     option :caching, type: :string, default: 'all',
            enum: ['all', 'keys_only', 'rows_only', 'none']
     option :compression, type: :string, default: 'none',
