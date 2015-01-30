@@ -13,10 +13,12 @@ class ColumnFetch < CassBench::Bench
                              "VALUES (?, ?, ?)"
 
     # Insert random rows
-    1.upto(options[:rows]) do |i|
-      session.execute insert, '%010d' % i, '%010d' % i, data
-      self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
-        if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
+    options[:overwrite].times do
+      1.upto(options[:rows]) do |i|
+        session.execute insert, '%010d' % i, '%010d' % i, data
+        self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
+          if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
+      end
     end
 
     @indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map { |n| '%010d' % n }
