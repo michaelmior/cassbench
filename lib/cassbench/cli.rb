@@ -24,6 +24,7 @@ module CassBench::CLI
     option :compression, type: :string, default: 'none',
            enum: ['snappy', 'lz4', 'deflate', 'none']
     option :rows, type: :numeric, default: 100_000
+    option :columns, type: :numeric, default: 1
     option :size, type: :numeric, default: 100
     option :random, type: :boolean, default: true
     option :replication_factor, type: :numeric, default: 3
