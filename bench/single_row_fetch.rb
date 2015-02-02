@@ -22,7 +22,7 @@ class SingleRowFetch < CassBench::Bench
     end
 
     @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map do |n|
-      Cassandra::Uuid.new(n)
+      Cassandra::Uuid.new(options[:random] ? n : 1)
     end
     @@query = session.prepare "SELECT data FROM single_row_fetch WHERE id=?;"
   end

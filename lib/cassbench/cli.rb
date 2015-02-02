@@ -25,6 +25,7 @@ module CassBench::CLI
            enum: ['snappy', 'lz4', 'deflate', 'none']
     option :rows, type: :numeric, default: 100_000
     option :size, type: :numeric, default: 100
+    option :random, type: :boolean, default: true
     option :replication_factor, type: :numeric, default: 3
     option :flush_every, type: :numeric, default: 0
     option :overwrite, type: :numeric, default: 1
