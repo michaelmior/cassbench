@@ -15,7 +15,7 @@ class ColumnFetch < CassBench::Bench
     # Insert random rows
     options[:overwrite].times do
       1.upto(options[:rows]) do |i|
-        1.upto(options[:columns] do |j|
+        1.upto(options[:columns]) do |j|
           session.execute insert, Cassandra::Uuid.new(i),
                                   Cassandra::Uuid.new(j), data
         end
