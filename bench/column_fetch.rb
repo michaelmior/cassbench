@@ -24,7 +24,10 @@ class ColumnFetch < CassBench::Bench
       end
     end
 
-    @@indexes = 0.upto(options[:rows] - 1).to_a.shuffle.map do |n|
+    @@indexes = 1.upto(options[:rows]).to_a.shuffle.map do |n|
+      Cassandra::Uuid.new(options[:random] ? n : 1)
+    end
+    @@col_indexes = 1.upto(options[:columns]).to_a.shuffle.map do |n|
       Cassandra::Uuid.new(options[:random] ? n : 1)
     end
     @@query = session.prepare "SELECT data FROM column_fetch WHERE id=? " \
@@ -34,7 +37,8 @@ class ColumnFetch < CassBench::Bench
   def self.run(bench, session, options)
     bench.report('column_fetch') do |times|
       0.upto(times - 1) do |i|
-        session.execute @@query, @@indexes[i % options[:rows]], @@indexes.first
+        session.execute @@query, @@indexes[i % options[:rows]],
+                                 @@col_indexes[i % options[:columns]]
       end
     end
   end
