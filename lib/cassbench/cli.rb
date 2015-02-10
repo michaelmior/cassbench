@@ -22,7 +22,9 @@ module CassBench::CLI
     option :caching, type: :string, default: 'all',
            enum: ['all', 'keys_only', 'rows_only', 'none']
     option :compression, type: :string, default: 'none',
-           enum: ['snappy', 'lz4', 'deflate', 'none']
+                         enum: ['snappy', 'lz4', 'deflate', 'none']
+    option :compaction_strategy, type: :string, default: 'size',
+                                 enum: ['size', 'date', 'leveled']
     option :rows, type: :numeric, default: 100_000
     option :columns, type: :numeric, default: 1
     option :size, type: :numeric, default: 100
@@ -49,6 +51,11 @@ module CassBench::CLI
         'deflate' => 'DeflateCompressor',
         'none'    => ''
       }[options[:compression]]
+      options[:compaction_strategy] = {
+        'size'    => 'SizeTieredCompactionStrategy',
+        'date'    => 'DateTieredCompactionStrategy',
+        'leveled' => 'LeveledCompactionStrategy'
+      }[options[:compaction_strategy]]
 
       # Connect to the cluster and require (execute) the benchmark
       benchmarks.each do |benchmark|

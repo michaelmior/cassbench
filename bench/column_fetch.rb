@@ -5,7 +5,8 @@ class ColumnFetch < CassBench::Bench
                     "WITH caching = '#{options[:caching]}' AND " \
                     "compression={'sstable_compression': " \
                     "             '#{options[:compression]}'} AND " \
-                    "compaction={'class' : 'SizeTieredCompactionStrategy', " \
+                    "compaction={'class' : " \
+                    "            '#{options[:compaction_strategy]}', " \
                     "            'enabled': false };"
 
     data = '1' * options[:size]
