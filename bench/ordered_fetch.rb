@@ -7,7 +7,7 @@ class OrderedFetch < CassBench::Bench
                     "             '#{options[:compression]}'} AND " \
                     "compaction={'class' : " \
                     "            '#{options[:compaction_strategy]}', " \
-                    "            'enabled': false };"
+                    "            'enabled': false };" if options[:create]
 
     data = '1' * options[:size]
     insert = session.prepare "INSERT INTO ordered_fetch (id, data) " \
