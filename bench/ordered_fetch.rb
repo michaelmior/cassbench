@@ -23,7 +23,7 @@ class OrderedFetch < CassBench::Bench
     end
 
     @@indexes = 0.upto(options[:rows] - 1).map { |n| '%010d' % n }
-    @@query = "SELECT data FROM ordered_fetch WHERE id='?';"
+    @@query = "SELECT data FROM ordered_fetch WHERE id=?;"
   end
 
   def self.run(bench, session, options)
