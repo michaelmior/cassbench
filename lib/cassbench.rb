@@ -33,27 +33,29 @@ module CassBench
           if options[:compact]
       end
 
-      # Run all the benchmarks
-      data = Hash[benchmarks.map do |benchmark|
-        measurements = 1.upto(options[:repeat]).map do
-          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-          benchmark.run options[:iterations], session, options
-          Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+      if options[:repeat] > 0
+        # Run all the benchmarks
+        data = Hash[benchmarks.map do |benchmark|
+          measurements = 1.upto(options[:repeat]).map do
+            start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            benchmark.run options[:iterations], session, options
+            Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+          end
+
+          [benchmark.name, measurements]
+        end]
+
+        # Display all the collected measurements
+        data.each do |benchmark, measurements|
+          avg = measurements.inject(0, &:+) * 1.0 / measurements.length
+          stddev = Math.sqrt(measurements.map do |x|
+            (x - avg) ** 2
+          end.inject(0, &:+) / measurements.length)
+          z_value = 1.96  # z-score for 0.475, 95% CI
+          margin = z_value * stddev / Math.sqrt(measurements.length)
+
+          puts "#{benchmark.rjust 20}: #{avg.round 2} ± #{margin.round 2}"
         end
-
-        [benchmark.name, measurements]
-      end]
-
-      # Display all the collected measurements
-      data.each do |benchmark, measurements|
-        avg = measurements.inject(0, &:+) * 1.0 / measurements.length
-        stddev = Math.sqrt(measurements.map do |x|
-          (x - avg) ** 2
-        end.inject(0, &:+) / measurements.length)
-        z_value = 1.96  # z-score for 0.475, 95% CI
-        margin = z_value * stddev / Math.sqrt(measurements.length)
-
-        puts "#{benchmark.rjust 20}: #{avg.round 2} ± #{margin.round 2}"
       end
 
       # Run the cleanup for each benchmark
