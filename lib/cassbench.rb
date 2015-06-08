@@ -1,16 +1,6 @@
-require 'benchmark/ips'
-require 'benchmark/suite'
+# encoding: UTF-8
 
 require 'jmx4r' if RUBY_PLATFORM == 'java'
-
-module Benchmark
-  module IPS
-    class Job
-      # Microseconds per minutes (this forces more iterations)
-      MICROSECONDS_PER_100MS = 60_000_000
-    end
-  end
-end
 
 module SubclassTracking
     def self.extended(superclass)
@@ -44,15 +34,27 @@ module CassBench
       end
 
       # Run all the benchmarks
-      suite = Benchmark::Suite.create do |suite|
-        Benchmark.ips do |bench|
-          bench.config warmup: 30, time: 300
-          benchmarks.each { |benchmark| benchmark.run bench, session, options }
+      data = Hash[benchmarks.map do |benchmark|
+        measurements = 1.upto(options[:repeat]).map do
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          benchmark.run options[:iterations], session, options
+          Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
         end
-      end
 
-      # Display all the collected reports
-      suite.report.each(&:display)
+        [benchmark.name, measurements]
+      end]
+
+      # Display all the collected measurements
+      data.each do |benchmark, measurements|
+        avg = measurements.inject(0, &:+) * 1.0 / measurements.length
+        stddev = Math.sqrt(measurements.map do |x|
+          (x - avg) ** 2
+        end.inject(0, &:+) / measurements.length)
+        z_value = 1.96  # z-score for 0.475, 95% CI
+        margin = z_value * stddev / Math.sqrt(measurements.length)
+
+        puts "#{benchmark.rjust 20}: #{avg.round 2} ± #{margin.round 2}"
+      end
 
       # Run the cleanup for each benchmark
       benchmarks.each { |benchmark| benchmark.cleanup session } \

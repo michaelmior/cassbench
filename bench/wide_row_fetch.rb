@@ -31,11 +31,9 @@ class WideRowFetch < CassBench::Bench
     @@query = session.prepare "SELECT data FROM wide_row_fetch WHERE id=?;"
   end
 
-  def self.run(bench, session, options)
-    bench.report('wide_row_fetch') do |times|
-      0.upto(times - 1) do |i|
-        session.execute @@query, @@indexes[i % options[:rows]]
-      end
+  def self.run(times, session, options)
+    0.upto(times - 1) do |i|
+      session.execute @@query, @@indexes[i % options[:rows]]
     end
   end
 

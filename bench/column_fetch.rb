@@ -35,12 +35,10 @@ class ColumnFetch < CassBench::Bench
                               "AND col=?;"
   end
 
-  def self.run(bench, session, options)
-    bench.report('column_fetch') do |times|
-      0.upto(times - 1) do |i|
-        session.execute @@query, @@indexes[i % options[:rows]],
-                                 @@col_indexes[i % options[:columns]]
-      end
+  def self.run(times, session, options)
+    0.upto(times - 1) do |i|
+      session.execute @@query, @@indexes[i % options[:rows]],
+                               @@col_indexes[i % options[:columns]]
     end
   end
 

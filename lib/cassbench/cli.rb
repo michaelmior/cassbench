@@ -32,6 +32,8 @@ module CassBench::CLI
     option :replication_factor, type: :numeric, default: 3
     option :flush_every, type: :numeric, default: 0
     option :overwrite, type: :numeric, default: 1
+    option :iterations, type: :numeric, default: 1000
+    option :repeat, type: :numeric, default: 10
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]

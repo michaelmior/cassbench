@@ -26,11 +26,9 @@ class OrderedFetch < CassBench::Bench
     @@query = "SELECT data FROM ordered_fetch WHERE id=?;"
   end
 
-  def self.run(bench, session, options)
-    bench.report('ordered_fetch') do |times|
-      0.upto(times - 1) do |i|
-        session.execute @@query, @@indexes[i % options[:rows]]
-      end
+  def self.run(times, session, options)
+    0.upto(times - 1) do |i|
+      session.execute @@query, @@indexes[i % options[:rows]]
     end
   end
 

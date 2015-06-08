@@ -1,14 +1,6 @@
-GIT
-  remote: git://github.com/michaelmior/benchmark_suite.git
-  revision: 5386cadca8e257e26924533bdee88633d0e0ca35
-  ref: 5386cad
-  specs:
-    benchmark_suite (1.0.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
-    benchmark-ips (2.1.1)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     byebug (3.5.1)
@@ -33,6 +25,11 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pry (0.10.1-java)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+      spoon (~> 0.0)
     pry-byebug (2.0.0)
       byebug (~> 3.4)
       pry (~> 0.10)
@@ -43,6 +40,8 @@ GEM
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
     slop (3.6.0)
+    spoon (0.0.4)
+      ffi
     thor (0.19.1)
 
 PLATFORMS
@@ -50,8 +49,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  benchmark-ips
-  benchmark_suite!
   cassandra-driver
   ffi
   jmx4r
@@ -60,3 +57,6 @@ DEPENDENCIES
   pry-rescue
   pry-stack_explorer
   thor
+
+BUNDLED WITH
+   1.10.3
