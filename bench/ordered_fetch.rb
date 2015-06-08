@@ -22,13 +22,28 @@ class OrderedFetch < CassBench::Bench
       end
     end
 
-    @@indexes = 0.upto(options[:rows] - 1).map { |n| '%010d' % n }
-    @@query = "SELECT data FROM ordered_fetch WHERE id=?;"
+    @@indexes = 1.upto(options[:rows]).to_a
+    @@indexes = @@indexes.shuffle.each_with_index.map do |n, i|
+      '%010d' % (options[:random] ? n : i)
+    end
+
+    if options[:batch]
+      @@query = "SELECT data FROM ordered_fetch WHERE id IN ?;"
+    else
+      @@query = "SELECT data FROM ordered_fetch WHERE id=?;"
+    end
   end
 
   def self.run(times, session, options)
-    0.upto(times - 1) do |i|
-      session.execute @@query, @@indexes[i % options[:rows]]
+    # Start at a random offset
+    start = rand options[:rows]
+
+    if options[:batch]
+      session.execute(@@query, @@indexes.lazy.cycle.drop(start).take(times).to_a).each(&:itself)
+    else
+      0.upto(times - 1) do |i|
+        session.execute(@@query, @@indexes[(i + start) % options[:rows]]).each(&:itself)
+      end
     end
   end
 
