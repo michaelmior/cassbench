@@ -32,7 +32,7 @@ module CassBench::CLI
     option :flush_every, type: :numeric, default: 0
     option :overwrite, type: :numeric, default: 1
     option :iterations, type: :numeric, default: 10000
-    option :repeat, type: :numeric, default: 5
+    option :repeat, type: :numeric, default: 100
     option :batch, type: :boolean, default: false
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
