@@ -14,18 +14,14 @@ class OrderedFetch < CassBench::Bench
                              "VALUES (?, ?)"
 
     # Insert random rows
+    @@indexes = 1.upto(options[:rows]).map { |i| '%010d' % i }
     options[:overwrite].times do
       1.upto(options[:rows]) do |i|
-        session.execute insert, '%010d' % i, data
+        session.execute insert, @@indexes[i], data
         self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
-    end
-
-    @@indexes = 1.upto(options[:rows]).to_a
-    @@indexes = @@indexes.shuffle.each_with_index.map do |n, i|
-      '%010d' % (options[:random] ? n : i)
-    end
+    end if options[:create]
 
     if options[:batch]
       @@query = "SELECT data FROM ordered_fetch WHERE id IN ?;"
@@ -39,10 +35,18 @@ class OrderedFetch < CassBench::Bench
     start = rand options[:rows]
 
     if options[:batch]
-      session.execute(@@query, @@indexes.lazy.cycle.drop(start).take(times).to_a).each(&:itself)
+      if options[:random]
+        session.execute(@@query, @@indexes.sample(times)).each(&:itself)
+      else
+        session.execute(@@query, @@indexes[start..(start + times)] + @@indexes.take([0, (start + times) - options[:rows] - 1].max)).each(&:itself)
+      end
     else
       0.upto(times - 1) do |i|
-        session.execute(@@query, @@indexes[(i + start) % options[:rows]]).each(&:itself)
+        if options[:random]
+          session.execute(@@query, @@indexes[(i + start) % options[:rows]]).each(&:itself)
+        else
+          session.execute(@@query, @@indexes.sample).each(&:itself)
+        end
       end
     end
   end
