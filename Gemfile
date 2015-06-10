@@ -6,6 +6,7 @@ gem 'thor'
 
 group :development do
   gem 'pry'
+  gem 'pry-rescue'
 end
 
 platform :jruby do
@@ -15,7 +16,6 @@ end
 platform :ruby do
   group :development do
     gem 'pry-byebug'
-    gem 'pry-rescue'
     gem 'pry-stack_explorer'
   end
 end
