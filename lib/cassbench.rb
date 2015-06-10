@@ -47,12 +47,10 @@ module CassBench
 
         # Display all the collected measurements
         data.each do |benchmark, measurements|
+          # Simple estimate of margin of error
+          # https://en.wikipedia.org/wiki/Margin_of_error#Calculations_assuming_random_sampling
           avg = measurements.inject(0, &:+) * 1.0 / measurements.length
-          stddev = Math.sqrt(measurements.map do |x|
-            (x - avg) ** 2
-          end.inject(0, &:+) / measurements.length)
-          z_value = 1.96  # z-score for 0.475, 95% CI
-          margin = z_value * stddev / Math.sqrt(measurements.length)
+          margin = 0.98 / Math.sqrt(measurements.length) * avg
 
           puts "#{benchmark.rjust 20}: #{avg.round 2} ± #{margin.round 2}"
         end
