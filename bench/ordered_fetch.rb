@@ -17,7 +17,7 @@ class OrderedFetch < CassBench::Bench
     @@indexes = 1.upto(options[:rows]).map { |i| '%010d' % i }
     options[:overwrite].times do
       1.upto(options[:rows]) do |i|
-        session.execute insert, @@indexes[i], data
+        session.execute insert, @@indexes[i - 1], data
         self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
