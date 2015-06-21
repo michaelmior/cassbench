@@ -1,8 +1,11 @@
 class ColumnFetch < CassBench::Bench
   def self.setup(cluster, session, options)
-    session.execute "CREATE TABLE column_fetch (id uuid, col uuid, " \
-                    "data text, PRIMARY KEY (id, col)) " \
-                    "WITH caching = '#{options[:caching]}' AND " \
+    col_range = 1.upto(options[:columns])
+    session.execute "CREATE TABLE column_fetch (id text, " +
+                    col_range.map { |i| "col#{i} text" }.join(', ') +
+                    ", data text, PRIMARY KEY (id, " +
+                    col_range.map { |i| "col#{i}" }.join(', ') +
+                    ")) WITH caching = '#{options[:caching]}' AND " \
                     "compression={'sstable_compression': " \
                     "             '#{options[:compression]}'} AND " \
                     "compaction={'class' : " \
@@ -10,35 +13,47 @@ class ColumnFetch < CassBench::Bench
                     "            'enabled': false };" if options[:create]
 
     data = '1' * options[:size]
-    insert = session.prepare "INSERT INTO column_fetch (id, col, data) " \
-                             "VALUES (?, ?, ?)"
+    insert = session.prepare "INSERT INTO column_fetch (id, " +
+                             col_range.map { |i| "col#{i}" }.join(', ') +
+                             ", data) VALUES (?, ?, " \
+                             "#{(['?'] * options[:columns]).join ', '})"
 
     # Insert random rows
+    @@indexes = 1.upto([options[:rows], options[:columns]].max).map do |i|
+      '%010d' % i
+    end
     options[:overwrite].times do
       1.upto(options[:rows]) do |i|
         1.upto(options[:columns]) do |j|
-          session.execute insert, Cassandra::Uuid.new(i),
-                                  Cassandra::Uuid.new(j), data
+          values = [@@indexes[i-1]]
+          values += 1.upto(options[:columns]).map do |k|
+            @@indexes[j - 1]
+          end
+          values << data
+          session.execute insert, *values
         end
         self.jmx_command cluster, :force_keyspace_flush, options[:keyspace] \
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
-    end
+    end if options[:create]
 
-    @@indexes = 1.upto(options[:rows]).to_a.shuffle.map do |n|
-      Cassandra::Uuid.new(options[:random] ? n : 1)
+    @@col_indexes = 1.upto(options[:columns]).map { |i| '%010d' % i }
+
+    if options[:batch]
+      @@query = session.prepare "SELECT data FROM column_fetch " \
+                                "WHERE id IN ? AND col1=?;"
+    else
+      @@query = session.prepare "SELECT data FROM column_fetch WHERE id=? " \
+                                "AND col1=?;"
     end
-    @@col_indexes = 1.upto(options[:columns]).to_a.shuffle.map do |n|
-      Cassandra::Uuid.new(options[:random] ? n : 1)
-    end
-    @@query = session.prepare "SELECT data FROM column_fetch WHERE id=? " \
-                              "AND col=?;"
   end
 
   def self.run(times, session, options)
-    0.upto(times - 1) do |i|
-      session.execute @@query, @@indexes[i % options[:rows]],
-                               @@col_indexes[i % options[:columns]]
+    if options[:batch]
+      if options[:random]
+        session.execute(@@query, @@indexes.sample(times),
+                        @@col_indexes.sample).each(&:itself)
+      end
     end
   end
 
