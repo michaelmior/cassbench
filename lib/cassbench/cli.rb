@@ -26,6 +26,9 @@ module CassBench::CLI
                                  enum: ['size', 'date', 'leveled']
     option :rows, type: :numeric, default: 100_000
     option :columns, type: :numeric, default: 1
+    option :cardinality, type: :numeric, default: 1
+    option :all, type: :boolean, default: false
+    option :filter, type: :numeric, default: 1
     option :size, type: :numeric, default: 100
     option :random, type: :boolean, default: true
     option :replication_factor, type: :numeric, default: 3
@@ -36,7 +39,7 @@ module CassBench::CLI
     option :batch, type: :boolean, default: false
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
-      cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port]
+      cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port], timeout: nil
       session = cluster.connect
 
       # Create the keyspace if asked and select it
