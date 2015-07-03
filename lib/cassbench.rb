@@ -33,28 +33,36 @@ module CassBench
           if options[:compact]
       end
 
-      if options[:repeat] > 0
-        # Run all the benchmarks
-        data = Hash[benchmarks.map do |benchmark|
-          measurements = 1.upto(options[:repeat]).map do
-            start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-            benchmark.run options[:iterations], session, options
-            Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+      warmup = true
+      total = 0
+      4.times do
+        if options[:repeat] > 0
+          # Run all the benchmarks
+          data = Hash[benchmarks.map do |benchmark|
+            measurements = 1.upto(options[:repeat]).map do
+              start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+              benchmark.run options[:iterations], session, options
+              Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+            end
+
+            [benchmark.name, measurements]
+          end]
+
+          # Display all the collected measurements
+          data.each do |benchmark, measurements|
+            # XXX No margin of error calculation for now
+            # # Simple estimate of margin of error
+            # # https://en.wikipedia.org/wiki/Margin_of_error#Calculations_assuming_random_sampling
+            # avg = measurements.inject(0, &:+) * 1.0 / measurements.length
+            total += avg unless warmup
+            # warmup = false if warmup
+            # margin = 0.98 / Math.sqrt(measurements.length) * avg
+
+            # # puts "#{benchmark.rjust 20}: #{avg.round 10} ± #{margin.round 5}"
           end
-
-          [benchmark.name, measurements]
-        end]
-
-        # Display all the collected measurements
-        data.each do |benchmark, measurements|
-          # Simple estimate of margin of error
-          # https://en.wikipedia.org/wiki/Margin_of_error#Calculations_assuming_random_sampling
-          avg = measurements.inject(0, &:+) * 1.0 / measurements.length
-          margin = 0.98 / Math.sqrt(measurements.length) * avg
-
-          puts "#{benchmark.rjust 20}: #{avg.round 2} ± #{margin.round 2}"
         end
       end
+      puts "#{(total / 3.0).round 10}"
 
       # Run the cleanup for each benchmark
       benchmarks.each { |benchmark| benchmark.cleanup session } \
