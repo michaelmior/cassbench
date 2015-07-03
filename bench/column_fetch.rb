@@ -25,8 +25,8 @@ class ColumnFetch < CassBench::Bench
     options[:overwrite].times do
       1.upto(options[:rows]) do |i|
         1.upto(options[:columns]) do |j|
-          values = [@@indexes[i-1]]
-          values += 1.upto(options[:columns]).map do |k|
+          values = [@@indexes[i-1], @@indexes[0]]
+          values += 1.upto(options[:columns] - 1).map do |k|
             @@indexes[j - 1]
           end
           values << data
@@ -36,8 +36,6 @@ class ColumnFetch < CassBench::Bench
           if options[:flush_every] > 0 && (i % options[:flush_every] == 0)
       end
     end if options[:create]
-
-    @@col_indexes = 1.upto(options[:columns]).map { |i| '%010d' % i }
 
     if options[:batch]
       @@query = session.prepare "SELECT data FROM column_fetch " \
@@ -52,7 +50,7 @@ class ColumnFetch < CassBench::Bench
     if options[:batch]
       if options[:random]
         session.execute(@@query, @@indexes.sample(times),
-                        @@col_indexes.sample).each(&:itself)
+                        @@indexes.first).each(&:itself)
       end
     end
   end
