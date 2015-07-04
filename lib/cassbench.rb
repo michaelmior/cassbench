@@ -50,14 +50,14 @@ module CassBench
 
           # Display all the collected measurements
           data.each do |benchmark, measurements|
+            avg = measurements.inject(0, &:+) * 1.0 / measurements.length
+            total += avg unless warmup
+            warmup = false if warmup
+
             # XXX No margin of error calculation for now
             # # Simple estimate of margin of error
             # # https://en.wikipedia.org/wiki/Margin_of_error#Calculations_assuming_random_sampling
-            # avg = measurements.inject(0, &:+) * 1.0 / measurements.length
-            total += avg unless warmup
-            # warmup = false if warmup
             # margin = 0.98 / Math.sqrt(measurements.length) * avg
-
             # # puts "#{benchmark.rjust 20}: #{avg.round 10} ± #{margin.round 5}"
           end
         end
