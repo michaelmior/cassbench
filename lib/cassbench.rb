@@ -33,9 +33,9 @@ module CassBench
           if options[:compact]
       end
 
-      warmup = true
+      warmup = !options[:single]
       total = 0
-      4.times do
+      (options[:single] ? 1 : 4).times do
         if options[:repeat] > 0
           # Run all the benchmarks
           data = Hash[benchmarks.map do |benchmark|
@@ -62,7 +62,7 @@ module CassBench
           end
         end
       end
-      puts "#{(total / 3.0).round 10}"
+      puts "#{(total / (options[:single] ? 1.0 : 3.0)).round 10}"
 
       # Run the cleanup for each benchmark
       benchmarks.each { |benchmark| benchmark.cleanup session } \

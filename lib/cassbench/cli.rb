@@ -37,6 +37,7 @@ module CassBench::CLI
     option :iterations, type: :numeric, default: 10000
     option :repeat, type: :numeric, default: 100
     option :batch, type: :boolean, default: false
+    option :single, type: :boolean, default: false
     def bench(*benchmarks)
       # Initialize a new cluster pointing at the given host
       cluster = Cassandra.cluster hosts: [options[:host]], port: options[:port], timeout: nil
